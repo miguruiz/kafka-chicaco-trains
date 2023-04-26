@@ -25,9 +25,9 @@ class Turnstile(Producer):
             .replace("'", "")
         )
 
-
+        topic_name = f"chicago.rail.station.{station_name}.turnstile"
         super().__init__(
-            f"chicago.rail.station.{station_name}.turnstile",
+            topic_name,
             key_schema=Turnstile.key_schema,
             value_schema=Turnstile.value_schema,
             num_partitions=1,
