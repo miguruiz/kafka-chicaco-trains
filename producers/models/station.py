@@ -33,7 +33,7 @@ class Station(Producer):
 
 
 
-        topic_name = f"chicago.rail.station.{station_name}.arrivals.2"
+        topic_name = f"chicago.rail.station.{station_name}.arrivals"
         number_of_partitions = 1
         number_of_replicas = 1
 

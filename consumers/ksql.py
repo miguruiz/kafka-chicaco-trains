@@ -12,29 +12,28 @@ logger = logging.getLogger(__name__)
 
 KSQL_URL = "http://localhost:8088"#"http://ksql:8088"
 
-#
-# TODO: Complete the following KSQL statements.
-# TODO: For the first statement, create a `turnstile` table from your turnstile topic.
-#       Make sure to use 'avro' datatype!
-# TODO: For the second statment, create a `turnstile_summary` table by selecting from the
-#       `turnstile` table and grouping on station_id.
-#       Make sure to cast the COUNT of station id to `count`
-#       Make sure to set the value format to JSON
+
 
 KSQL_STATEMENT = """
-CREATE TABLE turnstile (
-    ???
+CREATE TABLE TURNSTILE (
+    station_id VARCHAR,
+    station_name VARCHAR,
+    line VARCHAR
 ) WITH (
-    ???
+    KAFKA_TOPIC='chicago.rail.all_station.turnstile',
+    VALUE_FORMAT='AVRO',
+    KEY='station_id'
 );
-
-CREATE TABLE turnstile_summary
-WITH (???) AS
-    ???
 """
 
+KSQL_STATEMENT_2 = """CREATE TABLE TURNSTILE_SUMMARY
+WITH (VALUE_FORMAT='json') AS
+SELECT station_id, COUNT(station_id) AS COUNT
+FROM TURNSTILE
+GROUP BY station_id;"""
 
-def execute_statement():
+
+def execute_statement(KSQL_STATEMENT = KSQL_STATEMENT):
     """Executes the KSQL statement against the KSQL API"""
     if topic_check.topic_exists("TURNSTILE_SUMMARY") is True:
         return
@@ -53,8 +52,10 @@ def execute_statement():
     )
 
     # Ensure that a 2XX status code was returned
+    print(resp.json())
     resp.raise_for_status()
 
 
 if __name__ == "__main__":
-    execute_statement()
+    execute_statement(KSQL_STATEMENT)
+    execute_statement(KSQL_STATEMENT_2)
