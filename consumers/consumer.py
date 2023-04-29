@@ -45,7 +45,8 @@ class KafkaConsumer:
             self.consumer = Consumer({
                 'bootstrap.servers': self.broker_properties["bootstrap.servers"],
                 'group.id': 'stations-consumer-group',
-                'auto.offset.reset': 'earliest'
+                'auto.offset.reset': "earliest" if offset_earliest else "latest"
+
             })
 
         self.consumer.subscribe(topic_name_pattern)
@@ -69,13 +70,18 @@ class KafkaConsumer:
 
     def _consume(self):
         """Polls for a message. Returns 1 if a message was received, 0 otherwise"""
-        while True:
-            num_results = 1
-            while num_results > 0:
-                num_results = self._consume()
-            await gen.sleep(self.sleep_secs)
-        return 0
+        try:
+            message = self.consumer.poll(timeout=self.consume_timeout)
+        except Exception as e:
+            logger.error('Cannot poll message from {}'.format(self.topic_name_pattern))
+            return 0
 
+        if message is None or message.error():
+            return 0
+
+        else:
+            self.message_handler(message)
+            return 1
 
     def close(self):
         """Cleans up any open kafka consumers"""
