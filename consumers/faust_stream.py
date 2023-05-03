@@ -68,6 +68,7 @@ async def process(stations_stream):
             line = get_line_color(station)
         )
         print(json.dumps(asdict(transformed_station), indent=2))
+        table[station.station_id] = transformed_station
         await out_topic.send(key=transformed_station.station_name, value=transformed_station)
 
 
